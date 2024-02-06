@@ -52,7 +52,7 @@ def DepthToAnnoPeaks(i_depth_array, H37Rv_Anno_DF):
     peaks_DF = peaks_DF[['chrom', 'start', 'end']]
 
     # Step 3: Annotate peaks DF by overlapping w/ H37Rv annotations DF
-    i_ISPeaks_Anno_DF = Anno_ISPeaks(i_Peaks_DF, H37Rv_Anno_DF)
+    i_ISPeaks_Anno_DF = Anno_ISPeaks(peaks_DF, H37Rv_Anno_DF)
     
     return i_ISPeaks_Anno_DF
 
