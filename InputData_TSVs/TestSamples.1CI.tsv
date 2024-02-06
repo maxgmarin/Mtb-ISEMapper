@@ -1,0 +1,2 @@
+SampleID	status	SampleLib	Illumina_PE_FQs_PATH
+MFS-165	Finished	MFS-165_lib47344	/n/data1/hms/dbmi/farhat/fastq_db/TRUST_Illumina/220510.ZA.Set1.FQs/Merged_PE_FASTQs_V2/MFS-165_lib47344_R1.fastq.gz;/n/data1/hms/dbmi/farhat/fastq_db/TRUST_Illumina/220510.ZA.Set1.FQs/Merged_PE_FASTQs_V2/MFS-165_lib47344_R2.fastq.gz

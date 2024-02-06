@@ -1,0 +1,135 @@
+# This is a snakemake file/script for processing of PE Illumina WGS to detect IS6110 insertions in Mtb genomes.
+
+### Maximillian Marin (mgmarin@g.harvard.edu)
+
+# snk_yaml = "snk.yml"
+# try:
+#   from snk import validate_config
+#   validate_config(config, snk_yaml)
+# except ImportError:
+#   pass
+
+
+# Define PATH to the reference genome to be used: 
+IS6110_Ref_PrefixPATH = config["IS6110_BTI"]
+Rv_Ref_PrefixPATH = config["Rv_IS6110Masked_BTI"]
+
+
+# Define PATH of OUTPUT directory
+out_Dir = config["out_Dir"]
+
+
+import pandas as pd
+
+# Read in data regarding input 
+Info_df = pd.read_csv( config["inputData_TSV"], sep='\t')
+
+input_All_SampleIDs = list( Info_df["SampleID"].values )
+
+# Iterate over each sample's row and define path to input FQ files for each sequencing technology
+if "Illumina_PE_FQs_PATH" in Info_df.columns:
+    SampleIDTo_Illumina_PE_FQ1_Dict = {}
+    SampleIDTo_Illumina_PE_FQ2_Dict = {}
+
+    for idx, row in Info_df.iterrows():
+        
+        SampleID_i = row["SampleID"]
+        
+        Illumina_FQs_PATH = row["Illumina_PE_FQs_PATH"]
+        Ill_FastQ_Files_List = Illumina_FQs_PATH.split(";")
+            
+        if len(Ill_FastQ_Files_List) == 2:
+
+            FQ_1_PATH, FQ_2_PATH = Ill_FastQ_Files_List
+
+            SampleIDTo_Illumina_PE_FQ1_Dict[SampleID_i] = FQ_1_PATH
+            SampleIDTo_Illumina_PE_FQ2_Dict[SampleID_i] = FQ_2_PATH
+
+else:
+    SampleIDTo_Illumina_PE_FQ1_Dict = Info_df.set_index('SampleID')['FQ1_PATH'].to_dict()
+    SampleIDTo_Illumina_PE_FQ2_Dict = Info_df.set_index('SampleID')['FQ2_PATH'].to_dict()
+
+
+
+print("# of input SampleIDs detected:", len(input_All_SampleIDs))
+
+
+rule all:
+    input:
+        expand(out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.peaks.txt", sampleID = input_All_SampleIDs),
+
+
+rule Merge_Input_FQs:
+    input:
+        fq1 = lambda wildcards: SampleIDTo_Illumina_PE_FQ1_Dict[wildcards.sampleID],
+        fq2 = lambda wildcards: SampleIDTo_Illumina_PE_FQ2_Dict[wildcards.sampleID],
+    output:
+        merged_fq = temp(out_Dir + "/{sampleID}/FASTQs/{sampleID}.merged.fastq.gz"),
+    shell:
+        "cat {input.fq1} {input.fq2} > {output.merged_fq} "
+
+
+rule bowtie2_AlignToIS6110:
+    input:
+        merged_fq = out_Dir + "/{sampleID}/FASTQs/{sampleID}.merged.fastq.gz",
+        IS6110_1_BT2_PATH = IS6110_Ref_PrefixPATH + ".1.bt2",
+    output:
+        AlnToIS6110_SAM = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.AlnToIS6110.sam"),
+        AlnToIS6110_BAM = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.AlnToIS6110.sorted.bam"),
+        AlnToIS6110_BAI = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.AlnToIS6110.sorted.bam.bai"),
+        IS6110_Only_FQ  = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.IS6110.Reads.fastq"),
+        IS6110_Only_FQGZ = out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.IS6110.Reads.fastq.gz",
+    params:
+        IS6110_Prefix_PATH = IS6110_Ref_PrefixPATH
+    threads: 8
+    shell:
+        "bowtie2 --threads {threads} --local -x {params.IS6110_Prefix_PATH} -U {input.merged_fq} -S {output.AlnToIS6110_SAM} --no-unal \n"
+        "samtools view -b -S {output.AlnToIS6110_SAM} | samtools sort - > {output.AlnToIS6110_BAM} \n"
+        "samtools index {output.AlnToIS6110_BAM} \n"
+        "bedtools bamtofastq -i {output.AlnToIS6110_BAM} -fq {output.IS6110_Only_FQ} \n"
+        "gzip -c < {output.IS6110_Only_FQ} > {output.IS6110_Only_FQGZ}"
+
+
+rule bowtie2_Align_IS6110_Reads_ToH37Rv:
+    input:
+        IS6110_Only_FQ = out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.IS6110.Reads.fastq",
+        Rv_IS6110Masked_1_BT2 = Rv_Ref_PrefixPATH + ".1.bt2"
+    output:
+        AlnToRv_SAM          = temp(out_Dir + "/{sampleID}/2_AlignIS6110Reads_ToRv/{sampleID}.IS6110Reads.AlnToRv.sam"),
+        AlnToRv_Filtered_SAM = temp(out_Dir + "/{sampleID}/2_AlignIS6110Reads_ToRv/{sampleID}.IS6110Reads.AlnToRv.Filtered.sam"),
+        AlnToRv_Filtered_BAM = out_Dir + "/{sampleID}/2_AlignIS6110Reads_ToRv/{sampleID}.IS6110Reads.AlnToRv.Filtered.sorted.bam",
+        AlnToRv_Filtered_BAI = out_Dir + "/{sampleID}/2_AlignIS6110Reads_ToRv/{sampleID}.IS6110Reads.AlnToRv.Filtered.sorted.bam.bai",
+    params:
+        Rv_IS6110Masked_Prefix_PATH = Rv_Ref_PrefixPATH
+    threads: 1
+    shell:
+        "bowtie2 --local -x {params.Rv_IS6110Masked_Prefix_PATH} -U {input.IS6110_Only_FQ} -S {output.AlnToRv_SAM} --no-unal \n"
+        "samtools view -h -q 2 -S {output.AlnToRv_SAM} > {output.AlnToRv_Filtered_SAM} \n"
+        "samtools view -b -S {output.AlnToRv_Filtered_SAM} | samtools sort - > {output.AlnToRv_Filtered_BAM} \n" 
+        "samtools index {output.AlnToRv_Filtered_BAM} \n"
+
+
+rule run_samtools_depth:
+    input:
+        AlnToRv_Filtered_BAM = out_Dir + "/{sampleID}/2_AlignIS6110Reads_ToRv/{sampleID}.IS6110Reads.AlnToRv.Filtered.sorted.bam",
+    output:
+        AlnToRv_Filtered_Depth_TSV_GZ = out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.AlnToRv.Filtered.depth.tsv.gz",
+    shell:
+        "samtools depth {input.AlnToRv_Filtered_BAM} | gzip > {output.AlnToRv_Filtered_Depth_TSV_GZ} "
+
+
+rule run_depth_analysis:
+    input:
+        AlnToRv_Filtered_Depth_TSV_GZ = out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.AlnToRv.Filtered.depth.tsv.gz",
+    output:
+        peaks_TXT = out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.peaks.txt",
+    shell:
+        "scripts/DepthTXTtoPeaks.V3.py --in_depth_tsv {input} --out_peaks {output} "
+
+
+
+
+
+
+
+
