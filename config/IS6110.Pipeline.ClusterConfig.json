@@ -1,17 +1,17 @@
 {
     "__default__" :
     {
-        "t" : "0-00:4:00",
+        "t" : "0-00:04:00",
         "n" : 1,
         "c" : 1,
         "p" : "short",
-        "mem" : "2500mb",
+        "mem" : "1000mb",
         "o" : "O2logs/cluster/{rule}.{wildcards}.out",
         "e" : "O2logs/cluster/{rule}.{wildcards}.out"
     },
     "bowtie2_AlignToIS6110" :
     {
-        "t" : "0-00:15:0",
+        "t" : "0-00:10:0",
         "n" : 8,
         "p" : "short",
         "mem" : "1G",

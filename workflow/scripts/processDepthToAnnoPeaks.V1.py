@@ -33,8 +33,7 @@ def Anno_ISPeaks(i_Peaks_DF, H37Rv_Anno_DF):
 
 def parse_H37RvAnnoTSV(i_Rv_Regions_TSVGZ):
     RvAnno_DF = pd.read_csv(i_Rv_Regions_TSVGZ, sep = "\t")
-    RvAnno_DF.columns = ['chrom', 'start', 'end', 'strand', 'H37rv_GeneID', 'symbol', 'feature',
-           'functional_category']
+    RvAnno_DF.columns = ['chrom', 'start', 'end', 'strand', 'H37rv_GeneID', 'symbol', 'feature', 'functional_category']
     return RvAnno_DF
 
 def DepthToAnnoPeaks(i_depth_array, H37Rv_Anno_DF):

@@ -1,0 +1,6 @@
+SampleID	FQ1_PATH	FQ2_PATH
+ERR8975501	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR8975501/ERR8975501_R2.fastq.gz	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR8975501/ERR8975501_R1.fastq.gz
+TRL0112979	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/TRL0112979/TRL0112979_R2.fastq.gz	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/TRL0112979/TRL0112979_R1.fastq.gz
+ERR8975577	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR8975577/ERR8975577_R1.fastq.gz	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR8975577/ERR8975577_R2.fastq.gz
+ERR4828242	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR4828242/ERR4828242_R2.fastq.gz	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR4828242/ERR4828242_R1.fastq.gz
+ERR4814048	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR4814048/ERR4814048_R2.fastq.gz	/n/data1/hms/dbmi/farhat/rollingDB/fastq_db/ERR4814048/ERR4814048_R1.fastq.gz
