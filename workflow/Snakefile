@@ -67,7 +67,7 @@ rule bowtie2_AlignToIS6110:
         AlnToIS6110_BAM = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.AlnToIS6110.sorted.bam"),
         AlnToIS6110_BAI = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.AlnToIS6110.sorted.bam.bai"),
         IS6110_Only_FQ  = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.IS6110.Reads.fastq"),
-        IS6110_Only_FQGZ = out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.IS6110.Reads.fastq.gz",
+        IS6110_Only_FQGZ = temp(out_Dir + "/{sampleID}/1_AlignToIS6110/{sampleID}.IS6110.Reads.fastq.gz"),
     params:
         IS6110_Prefix_PATH = IS6110_Ref_PrefixPATH,
         runtime = '0-00:3:30',
@@ -135,15 +135,15 @@ rule run_depth_analysis:
         AlnToRv_Filtered_Depth_TSV_GZ = out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.AlnToRv.Filtered.depth.tsv.gz",
         Rv_Anno_TSV = config["Rv_Anno_TSV"]
     output:
-        peaks_TSV = temp(out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.peaks.tsv"),
+        peaks_TSV = out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.peaks.tsv",
         peaks_TSVGZ = out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.peaks.tsv.gz",
         peaks_BED = out_Dir + "/{sampleID}/3_DepthAnalysisToRv/{sampleID}.IS6110Reads.peaks.bed",
     params:
-        runtime = '0-00:1:00',
+        runtime = '0-00:1:30',
         partition = 'short'
     resources:
         mem_mb = 500,
-        runtime_s = 60
+        runtime_s = 90
     threads: 1
     conda:
         "envs/ISmapper_env.nobuilds.yml"
@@ -151,3 +151,7 @@ rule run_depth_analysis:
         "scripts/processDepthToAnnoPeaks.V1.py --in_depth_tsv {input.AlnToRv_Filtered_Depth_TSV_GZ} --out_peaks {output.peaks_TSV} --h37rv_anno_tsv {input.Rv_Anno_TSV} \n"
         "gzip -c < {output.peaks_TSV} > {output.peaks_TSVGZ} \n"
         "awk 'BEGIN{{FS=OFS=\"\t\"}} NR>1 {{$3=$2+1 FS $3; print $1, $2, $3, $4}}' {output.peaks_TSV} > {output.peaks_BED} "
+
+
+
+

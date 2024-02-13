@@ -1,7 +1,7 @@
 {
     "IS6110_BTI" : "/n/data1/hms/dbmi/farhat/mm774/Projects/IS6110_MappingProj/References/IS6110",
     "Rv_IS6110Masked_BTI" : "/n/data1/hms/dbmi/farhat/mm774/Projects/IS6110_MappingProj/References/H37Rv.IS6110Masked.V1",
-    "Rv_Anno_TSV" : "/n/data1/hms/dbmi/farhat/mm774/Projects/IS6110_MappingProj/Mtb-ISEMapper",
+    "Rv_Anno_TSV" : "resources/H37Rv_GenomeAnnotations.Genes.And.IntergenicRegions.Trim.tsv.gz",
     "out_Dir" : "../InputData_TSVs/TestSamples.2CI.tsv", 
     "inputData_TSV" : "../InputData_TSVs/TestSamples.2CI.tsv", 
 }

@@ -1,0 +1,36 @@
+logo: "Mtb_ISEmapper"
+
+tagline: "A workflow for processing detecting IS6110 transposon insertions within the Mtb genome"
+
+font: "cybermedium"
+
+resources:
+  - "resources/H37Rv_GenomeAnnotations.Genes.And.IntergenicRegions.Trim.tsv.gz"
+
+cli:
+  IS6110_BTI:
+    type: path
+    help: "Path to prefix of bowtie2 index of IS6110"
+    required: True
+    short: i
+  Rv_IS6110Masked_BTI:
+    type: path
+    help: "Path to prefix of bowtie2 index of H37Rv w/ IS6110 masked"
+    required: True
+    short: r
+  Rv_Anno_TSV:
+    default: "resources/H37Rv_GenomeAnnotations.Genes.And.IntergenicRegions.Trim.tsv.gz"
+    type: path
+    help: "Path to the TSV of H37Rv region annotations (Gene + Integenic)"
+    required: True
+    short: a
+  out_Dir:
+    type: path
+    help: "A string to save to a file"
+    required: False
+    short: o
+  inputData_TSV:
+    type: path
+    help: "Path to the TSV of SampleID and paths to paired-end FQs"
+    required: True
+    short: s
